@@ -16,7 +16,7 @@ import type { Board, Task, CreateTaskData, Column as ColumnType } from '../types
 import { Column } from './Column';
 import { TaskCard } from './TaskCard';
 import { AddTaskModal } from './AddTaskModal';
-import { ThemeToggle } from './ThemeToggle';
+import { EnhancedHeader } from './EnhancedHeader';
 
 interface KanbanBoardProps {
   board: Board;
@@ -168,47 +168,14 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }
   const selectedColumn = board.columns.find(col => col.id === selectedColumnId);
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/50 transition-colors duration-300">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
-            {board.title}
-          </h1>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <div className="flex -space-x-2">
-              {board.teamMembers.slice(0, 3).map((member) => (
-                <div
-                  key={member.id}
-                  className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold border-2 border-white dark:border-gray-800 shadow-md"
-                  title={member.name}
-                >
-                  {member.name.charAt(0).toUpperCase()}
-                </div>
-              ))}
-              {board.teamMembers.length > 3 && (
-                <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xs font-bold border-2 border-white dark:border-gray-800 shadow-md">
-                  +{board.teamMembers.length - 3}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-6 text-sm">
-          <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 px-4 py-2 rounded-full">
-            <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <span className="font-semibold text-gray-700 dark:text-gray-300">{board.columns.length} columns</span>
-          </div>
-          <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 px-4 py-2 rounded-full">
-            <div className="h-2 w-2 bg-indigo-500 rounded-full animate-pulse"></div>
-            <span className="font-semibold text-gray-700 dark:text-gray-300">{board.columns.reduce((total, col) => total + col.tasks.length, 0)} tasks</span>
-          </div>
-          <div className="flex items-center gap-2 bg-purple-50 dark:bg-purple-900/30 px-4 py-2 rounded-full">
-            <div className="h-2 w-2 bg-purple-500 rounded-full animate-pulse"></div>
-            <span className="font-semibold text-gray-700 dark:text-gray-300">{board.teamMembers.length} team members</span>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen px-8 py-4 animate-slide-up max-w-screen-2xl mx-auto">
+      <EnhancedHeader 
+        board={board} 
+        onAddTask={() => {
+          setSelectedColumnId(board.columns[0]?.id || '');
+          setIsAddModalOpen(true);
+        }}
+      />
 
       <DndContext
         sensors={sensors}
@@ -216,7 +183,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6 w-full">
           {board.columns.map((column) => (
             <Column
               key={column.id}
@@ -228,7 +195,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }
 
         <DragOverlay>
           {activeTask ? (
-            <div className="transform rotate-3 scale-110">
+            <div className="transform rotate-3 scale-110 opacity-90">
               <TaskCard task={activeTask} />
             </div>
           ) : null}

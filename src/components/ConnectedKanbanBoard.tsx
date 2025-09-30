@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { KanbanBoard } from './KanbanBoard';
 import type { Board, Column, Task } from '../types';
 import { getTasks } from '../api/tasks';

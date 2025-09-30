@@ -13,30 +13,88 @@
 
 @layer components {
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-5 backdrop-blur-sm;
+    @apply bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-800 dark:to-gray-900/50 rounded-2xl shadow-lg border-2 border-gray-200/60 dark:border-gray-700/60 p-6 backdrop-blur-xl transition-all duration-300 hover:shadow-xl hover:scale-[1.01];
   }
   
   .btn-primary {
-    @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-500 dark:to-indigo-500 dark:hover:from-blue-600 dark:hover:to-indigo-600 text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-300 shadow-md hover:shadow-xl transform hover:scale-105;
+    @apply bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 dark:from-blue-500 dark:via-indigo-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:via-indigo-600 dark:hover:to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105 active:scale-95;
   }
   
   .btn-secondary {
-    @apply bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md;
+    @apply bg-white dark:bg-gray-800 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 text-gray-700 dark:text-gray-200 font-semibold py-3 px-6 rounded-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-md hover:shadow-xl transform hover:scale-105 active:scale-95;
   }
   
   .column {
-    @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-5 min-h-96 w-80 flex flex-col shadow-lg border border-gray-200/50 dark:border-gray-700/50;
+    @apply bg-gradient-to-b from-white/95 to-gray-50/95 dark:from-gray-800/95 dark:to-gray-900/95 backdrop-blur-2xl rounded-2xl p-6 min-h-[600px] flex flex-col shadow-lg border-2 border-gray-200/60 dark:border-gray-700/60 hover:border-blue-300/70 dark:hover:border-blue-600/70 transition-all duration-300;
   }
   
   .task-card {
-    @apply bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 shadow-md border border-gray-100 dark:border-gray-700 cursor-grab active:cursor-grabbing transition-all duration-200 hover:shadow-xl hover:scale-[1.02];
+    @apply bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-900/20 rounded-2xl p-5 mb-3 shadow-sm border-2 border-gray-100 dark:border-gray-700 cursor-grab active:cursor-grabbing transition-all duration-300 hover:shadow-lg hover:scale-[1.03] hover:border-blue-400 dark:hover:border-blue-500 hover:-translate-y-1;
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent font-extrabold;
   }
   
   .glass-effect {
-    @apply bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-white/50 dark:border-gray-700/50 shadow-xl;
+    @apply bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl border-2 border-white/60 dark:border-gray-700/60 shadow-lg rounded-2xl;
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradientShift 3s ease infinite;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
