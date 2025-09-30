@@ -2,6 +2,7 @@
 import { LoginPage } from './pages/LoginPage';
 import { Header } from './components/Header';
 import { ConnectedKanbanBoard } from './components/ConnectedKanbanBoard';
+import { MessagingPanel } from './components/MessagingPanel';
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -16,6 +17,7 @@ function App() {
       <main className="pt-20">
         <ConnectedKanbanBoard />
       </main>
+      <MessagingPanel />
     </div>
   );
 }
