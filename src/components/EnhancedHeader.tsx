@@ -1,6 +1,5 @@
 import React from 'react';
 import { Plus, Users, BarChart3, TrendingUp } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
 import type { Board } from '../types';
 
 interface EnhancedHeaderProps {
@@ -41,7 +40,6 @@ export const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({ board, onAddTask
             <Plus className="h-5 w-5 relative z-10" />
             <span className="relative z-10 text-base font-display font-semibold">Add New Task</span>
           </button>
-          <ThemeToggle />
         </div>
       </div>
       
