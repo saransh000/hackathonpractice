@@ -10,6 +10,7 @@ import authRoutes from './routes/auth';
 import taskRoutes from './routes/tasks';
 import boardRoutes from './routes/boards';
 import userRoutes from './routes/users';
+import adminRoutes from './routes/admin';
 
 const createApp = () => {
   const app = express();
@@ -38,6 +39,7 @@ const createApp = () => {
   app.use('/api/tasks', taskRoutes);
   app.use('/api/boards', boardRoutes);
   app.use('/api/users', userRoutes);
+  app.use('/api/admin', adminRoutes);
 
   // Error handling middleware
   app.use(notFound);
