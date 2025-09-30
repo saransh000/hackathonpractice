@@ -12,6 +12,7 @@ import taskRoutes from './routes/tasks';
 import boardRoutes from './routes/boards';
 import userRoutes from './routes/users';
 import adminRoutes from './routes/admin';
+import messageRoutes from './routes/messages';
 
 const createApp = () => {
   const app = express();
@@ -20,7 +21,7 @@ const createApp = () => {
   app.use(helmet());
   app.use(compression());
   app.use(cors({
-    origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174'],
+    origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
     credentials: true,
   }));
   
@@ -45,6 +46,7 @@ const createApp = () => {
   app.use('/api/boards', boardRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/admin', adminLimiter, adminRoutes);
+  app.use('/api/messages', messageRoutes);
 
   // Error handling middleware
   app.use(notFound);

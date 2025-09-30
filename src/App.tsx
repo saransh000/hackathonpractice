@@ -4,6 +4,7 @@ import { LoginPage } from './pages/LoginPage';
 import { DatabaseViewerPage } from './pages/DatabaseViewerPage';
 import { Header } from './components/Header';
 import { ConnectedKanbanBoard } from './components/ConnectedKanbanBoard';
+import { MessagingPanel } from './components/MessagingPanel';
 
 function App() {
   const { isAuthenticated, user } = useAuth();
@@ -44,6 +45,7 @@ function App() {
       <main className="pt-20">
         <ConnectedKanbanBoard />
       </main>
+      <MessagingPanel />
     </div>
   );
 }
