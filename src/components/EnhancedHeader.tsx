@@ -14,22 +14,25 @@ export const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({ board, onAddTask
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
-    <div className="relative glass-effect p-6 rounded-2xl mb-6 border-2 border-white/40 dark:border-gray-700/40 shadow-lg animate-slide-up">
+    <div className="relative glass-effect p-6 rounded-2xl mb-6 border-2 border-white/40 dark:border-gray-700/40 shadow-lg overflow-hidden">
       {/* Subtle background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/20 to-purple-50/30 dark:from-blue-950/20 dark:via-indigo-950/10 dark:to-purple-950/20 rounded-2xl pointer-events-none"></div>
       <div className="relative z-10">
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-5xl font-display font-black mb-1 leading-tight tracking-tight">
+        <div className="flex-1">
+          {/* Title with slide-in animation */}
+          <h1 className="text-5xl font-display font-black mb-1 leading-tight tracking-tight animate-slide-in-left opacity-0" style={{ animationDelay: '0.1s' }}>
             <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent drop-shadow-sm animate-gradient">
               {board.title}
             </span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-base font-normal">
+          {/* Subtitle with delayed fade-in */}
+          <p className="text-gray-600 dark:text-gray-400 text-base font-normal animate-fade-in-up opacity-0" style={{ animationDelay: '0.5s' }}>
             Organize your hackathon tasks and collaborate with your team
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        {/* Buttons with delayed animation */}
+        <div className="flex items-center gap-3 animate-fade-in-up opacity-0" style={{ animationDelay: '0.7s' }}>
           <button
             onClick={onAddTask}
             className="relative group bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-bold py-3.5 px-7 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 flex items-center gap-2.5"
@@ -42,8 +45,8 @@ export const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({ board, onAddTask
         </div>
       </div>
       
-      {/* Stats Section */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
+      {/* Stats Section with delayed animation */}
+      <div className="flex items-center justify-between pt-4 border-t border-gray-200/50 dark:border-gray-700/50 animate-fade-in-up opacity-0" style={{ animationDelay: '0.9s' }}>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Users className="h-4 w-4 text-blue-500" />

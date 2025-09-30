@@ -17,7 +17,7 @@ export const Column: React.FC<ColumnProps> = ({ column, onAddTask }) => {
   });
 
   return (
-    <div className="column animate-slide-up">
+    <div className="column">
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
           <h2 className="font-display font-bold text-gray-800 dark:text-gray-100 text-base tracking-tight">{column.title}</h2>

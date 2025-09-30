@@ -168,7 +168,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }
   const selectedColumn = board.columns.find(col => col.id === selectedColumnId);
 
   return (
-    <div className="min-h-screen px-8 py-4 animate-slide-up max-w-screen-2xl mx-auto">
+    <div className="min-h-screen px-8 py-4 max-w-screen-2xl mx-auto">
       <EnhancedHeader 
         board={board} 
         onAddTask={() => {
@@ -184,12 +184,17 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }
         onDragEnd={handleDragEnd}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6 w-full">
-          {board.columns.map((column) => (
-            <Column
+          {board.columns.map((column, index) => (
+            <div
               key={column.id}
-              column={column}
-              onAddTask={handleAddTask}
-            />
+              className="animate-fade-in-up opacity-0"
+              style={{ animationDelay: `${1.1 + index * 0.15}s` }}
+            >
+              <Column
+                column={column}
+                onAddTask={handleAddTask}
+              />
+            </div>
           ))}
         </div>
 
