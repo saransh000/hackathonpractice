@@ -65,14 +65,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
       )}
     >
       <div className="flex items-start justify-between mb-3">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm line-clamp-2 flex-1 pr-2 group-hover:text-gray-900 dark:group-hover:text-white">
+        <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm line-clamp-2 flex-1 pr-2 group-hover:text-gray-900 dark:group-hover:text-white tracking-tight">
           {task.title}
         </h3>
         {getPriorityIcon(task.priority)}
       </div>
       
       {task.description && (
-        <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 leading-relaxed">
+        <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 leading-relaxed font-normal">
           {task.description}
         </p>
       )}

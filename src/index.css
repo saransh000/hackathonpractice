@@ -2,13 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
+/* Base styles with improved typography */
+body {
     @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-900 text-gray-900 dark:text-gray-100 font-sans antialiased;
     margin: 0;
+    padding: 0;
     min-height: 100vh;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 @layer components {
@@ -32,11 +35,11 @@
     @apply bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-800 dark:to-blue-900/20 rounded-2xl p-5 mb-3 shadow-sm border-2 border-gray-100 dark:border-gray-700 cursor-grab active:cursor-grabbing transition-all duration-300 hover:shadow-lg hover:scale-[1.03] hover:border-blue-400 dark:hover:border-blue-500 hover:-translate-y-1;
   }
   
-  .gradient-text {
-    @apply bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent font-extrabold;
-  }
-  
-  .glass-effect {
+.gradient-text {
+    @apply bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent font-black;
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.025em;
+}  .glass-effect {
     @apply bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl border-2 border-white/60 dark:border-gray-700/60 shadow-lg rounded-2xl;
   }
   

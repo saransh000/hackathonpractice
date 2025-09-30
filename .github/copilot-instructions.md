@@ -11,8 +11,10 @@ Building a React frontend for a Hackathon Helper Tool - a lightweight Kanban boa
 - [x] Install Required Extensions - No additional extensions needed
 - [x] Compile the Project - Successfully built with npm run build
 - [x] Create and Run Task - Development server task created and running
-- [x] Launch the Project - Available at http://localhost:5173/
+- [x] Launch the Project - Available at http://localhost:5175/
 - [x] Ensure Documentation is Complete - README updated with project details
+- [x] Implement Authentication - Login and signup pages with demo users
+- [x] Enhance Typography - Added Poppins + Inter fonts with proper weight hierarchy
 
 ## Project Requirements
 - **Tech Stack**: React frontend (part of MERN stack)
@@ -21,12 +23,37 @@ Building a React frontend for a Hackathon Helper Tool - a lightweight Kanban boa
   - Task assignment and tracking
   - Team progress sharing
   - Lightweight and simple interface
-- **Styling**: Tailwind CSS
+  - User authentication (login/signup)
+- **Styling**: Tailwind CSS with custom design system
+- **Typography**: Poppins for headings, Inter for body text
 - **Language**: TypeScript for better development experience
+
+## Design System
+
+### Typography
+- **Display/Headings**: Poppins (weights: 400-900)
+  - Main headings: font-black (900) with tracking-tight
+  - Section headings: font-bold (700)
+  - Buttons/CTAs: font-semibold (600)
+- **Body/UI**: Inter (weights: 300-700)
+  - Body text: font-normal (400)
+  - Subtitles: font-light (300)
+  - Labels: font-medium (500)
+  - User names: font-semibold (600)
+
+### Visual Elements
+- **Corner Radius**: Unified rounded-2xl
+- **Shadows**: Two-tier hierarchy (shadow-sm for tasks, shadow-lg for containers)
+- **Gradients**: Blue → Indigo → Purple theme
+- **Glassmorphism**: Backdrop blur effects throughout
+- **Animations**: float, glow, gradientShift, slideUp
 
 ## Components Created
 - KanbanBoard: Main component with drag & drop functionality
 - Column: Individual columns for task organization
 - TaskCard: Individual task cards with priority indicators
 - AddTaskModal: Modal for creating new tasks
+- EnhancedHeader: Premium header with stats and CTA
+- LoginPage: Beautiful authentication with demo accounts
+- SignupPage: User registration with validation
 - Types: TypeScript interfaces for type safety

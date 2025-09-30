@@ -16,8 +16,8 @@ export const Header: React.FC = () => {
             {user.name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <div className="font-semibold text-gray-900 dark:text-gray-100">{user.name}</div>
-            <div className="text-xs text-gray-600 dark:text-gray-400">{user.email}</div>
+            <div className="font-semibold text-gray-900 dark:text-gray-100 tracking-tight">{user.name}</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400 font-normal">{user.email}</div>
           </div>
           {user.role === 'admin' && (
             <span className="px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-sm">

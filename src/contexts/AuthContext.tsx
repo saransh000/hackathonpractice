@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { User, LoginCredentials, AuthContextType } from '../types/auth';
+import type { User, LoginCredentials, AuthContextType, SignupData } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -18,6 +18,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return savedUser ? JSON.parse(savedUser) : null;
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
+    const saved = localStorage.getItem('registeredUsers');
+    return saved ? JSON.parse(saved) : [...DEMO_USERS];
+  });
 
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
@@ -25,8 +29,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // For demo: Check if email exists in demo users (password is ignored for demo)
-    const foundUser = DEMO_USERS.find(u => u.email.toLowerCase() === credentials.email.toLowerCase());
+    // Check if email exists in registered users (password is ignored for demo)
+    const foundUser = registeredUsers.find(u => u.email.toLowerCase() === credentials.email.toLowerCase());
     
     if (foundUser) {
       setUser(foundUser);
@@ -34,8 +38,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false);
     } else {
       setIsLoading(false);
-      throw new Error('Invalid credentials. Try: alex@hackathon.com');
+      throw new Error('Invalid credentials. User not found.');
     }
+  };
+
+  const signup = async (data: SignupData) => {
+    setIsLoading(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Check if email already exists
+    const emailExists = registeredUsers.some(u => u.email.toLowerCase() === data.email.toLowerCase());
+    
+    if (emailExists) {
+      setIsLoading(false);
+      throw new Error('Email already registered');
+    }
+
+    // Create new user
+    const newUser: User = {
+      id: Date.now().toString(),
+      name: data.name,
+      email: data.email,
+      role: 'member',
+    };
+
+    // Update registered users
+    const updatedUsers = [...registeredUsers, newUser];
+    setRegisteredUsers(updatedUsers);
+    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+    
+    setIsLoading(false);
   };
 
   const logout = () => {
@@ -48,6 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       user, 
       isAuthenticated: !!user, 
       login, 
+      signup,
       logout, 
       isLoading 
     }}>

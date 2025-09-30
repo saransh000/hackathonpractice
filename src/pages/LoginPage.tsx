@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LogIn, Mail, Lock, Loader2, Users, CheckCircle, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import type { LoginCredentials } from '../types/auth';
+import { SignupPage } from './SignupPage';
 
 export const LoginPage: React.FC = () => {
   const { login, isLoading } = useAuth();
@@ -11,6 +12,12 @@ export const LoginPage: React.FC = () => {
   });
   const [error, setError] = useState('');
   const [showDemo, setShowDemo] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
+
+  // Show signup page if requested
+  if (showSignup) {
+    return <SignupPage onBackToLogin={() => setShowSignup(false)} />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,11 +58,11 @@ export const LoginPage: React.FC = () => {
               <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
                 <Sparkles className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-display font-black bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent tracking-tight">
                 Hackathon Helper
               </h1>
             </div>
-            <p className="text-xl text-gray-600 dark:text-gray-400">
+            <p className="text-xl text-gray-600 dark:text-gray-400 font-light">
               Organize your hackathon projects with ease
             </p>
           </div>
@@ -85,10 +92,10 @@ export const LoginPage: React.FC = () => {
               <div className="inline-flex p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4 lg:hidden">
                 <Sparkles className="h-8 w-8 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
                 Welcome Back
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 font-normal">
                 Sign in to manage your hackathon projects
               </p>
             </div>
@@ -193,7 +200,10 @@ export const LoginPage: React.FC = () => {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Don't have an account?{' '}
-                <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold">
+                <button 
+                  onClick={() => setShowSignup(true)}
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold"
+                >
                   Sign up
                 </button>
               </p>

@@ -20,12 +20,12 @@ export const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({ board, onAddTask
       <div className="relative z-10">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-5xl font-black mb-1 leading-tight">
+          <h1 className="text-5xl font-display font-black mb-1 leading-tight tracking-tight">
             <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent drop-shadow-sm animate-gradient">
               {board.title}
             </span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-base font-medium">
+          <p className="text-gray-600 dark:text-gray-400 text-base font-normal">
             Organize your hackathon tasks and collaborate with your team
           </p>
         </div>
@@ -36,7 +36,7 @@ export const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({ board, onAddTask
           >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
             <Plus className="h-5 w-5 relative z-10" />
-            <span className="relative z-10 text-base">Add New Task</span>
+            <span className="relative z-10 text-base font-display font-semibold">Add New Task</span>
           </button>
           <ThemeToggle />
         </div>
