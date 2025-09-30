@@ -1,9 +1,14 @@
 import React from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, Database } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onNavigateToDatabase?: () => void;
+  showDatabaseButton?: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onNavigateToDatabase, showDatabaseButton = false }) => {
   const { user, logout } = useAuth();
 
   if (!user) return null;
@@ -27,6 +32,16 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          {user.role === 'admin' && showDatabaseButton && onNavigateToDatabase && (
+            <button
+              onClick={onNavigateToDatabase}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg transition-all duration-200 font-semibold shadow-lg"
+              title="View Database"
+            >
+              <Database className="h-4 w-4" />
+              <span className="hidden sm:inline">Database</span>
+            </button>
+          )}
           <ThemeToggle />
           <button
             onClick={logout}
