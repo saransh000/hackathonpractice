@@ -1,242 +1,58 @@
-import { Request, Response } from 'express';
-import { User, IUser } from '../models/User';
-import { Task } from '../models/Task';
+import { Request, Response, NextFunction } from 'express';
+import { User } from '../models/User';
 import { Board } from '../models/Board';
+import { Task } from '../models/Task';
+import { getActiveSessions } from '../middleware/auth';
 
-// Get all users (Admin only)
-export const getAllUsers = async (req: Request, res: Response) => {
+// @desc    Get admin dashboard statistics
+// @route   GET /api/admin/dashboard
+// @access  Admin only
+export const getDashboardStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const search = req.query.search as string;
-    const role = req.query.role as string;
-
-    // Build query
-    let query: any = {};
+    // Get active sessions
+    const activeSessions = getActiveSessions();
     
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
-      ];
-    }
-    
-    if (role) {
-      query.role = role;
-    }
-
-    // Get total count for pagination
-    const total = await User.countDocuments(query);
-
-    // Get users with pagination
-    const users = await User.find(query)
-      .select('-password') // Exclude password field
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .skip((page - 1) * limit);
-
-    res.json({
-      success: true,
-      data: {
-        users,
-        pagination: {
-          currentPage: page,
-          totalPages: Math.ceil(total / limit),
-          totalUsers: total,
-          hasNext: page * limit < total,
-          hasPrev: page > 1
-        }
-      }
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch users',
-      details: error.message
-    });
-  }
-};
-
-// Get user by ID (Admin only)
-export const getUserById = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    const user = await User.findById(id).select('-password');
-    
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: 'User not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      data: user
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch user',
-      details: error.message
-    });
-  }
-};
-
-// Get user statistics (Admin only)
-export const getUserStats = async (req: Request, res: Response) => {
-  try {
+    // Get total users count
     const totalUsers = await User.countDocuments();
-    const adminUsers = await User.countDocuments({ role: 'admin' });
-    const memberUsers = await User.countDocuments({ role: 'member' });
     
-    // Get users by month for the last 6 months
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    // Get users registered today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const newUsersToday = await User.countDocuments({
+      createdAt: { $gte: today }
+    });
     
-    const usersByMonth = await User.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: sixMonthsAgo }
-        }
-      },
+    // Get users registered this week
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const newUsersThisWeek = await User.countDocuments({
+      createdAt: { $gte: weekAgo }
+    });
+    
+    // Get total boards
+    const totalBoards = await Board.countDocuments();
+    
+    // Get active boards (boards with tasks updated in last 24 hours)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const activeBoards = await Board.countDocuments({
+      updatedAt: { $gte: yesterday }
+    });
+    
+    // Get total tasks
+    const totalTasks = await Task.countDocuments();
+    
+    // Get tasks by status
+    const tasksByStatus = await Task.aggregate([
       {
         $group: {
-          _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' }
-          },
+          _id: '$status',
           count: { $sum: 1 }
         }
-      },
-      {
-        $sort: { '_id.year': 1, '_id.month': 1 }
       }
     ]);
-
-    // Recent registrations (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
-    const recentUsers = await User.find({
-      createdAt: { $gte: sevenDaysAgo }
-    })
-    .select('name email createdAt role')
-    .sort({ createdAt: -1 })
-    .limit(10);
-
-    res.json({
-      success: true,
-      data: {
-        totalUsers,
-        adminUsers,
-        memberUsers,
-        usersByMonth,
-        recentUsers,
-        stats: {
-          adminPercentage: totalUsers > 0 ? (adminUsers / totalUsers * 100).toFixed(1) : 0,
-          memberPercentage: totalUsers > 0 ? (memberUsers / totalUsers * 100).toFixed(1) : 0
-        }
-      }
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch user statistics',
-      details: error.message
-    });
-  }
-};
-
-// Update user role (Admin only)
-export const updateUserRole = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { role } = req.body;
-
-    if (!['admin', 'member'].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid role. Must be either "admin" or "member"'
-      });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      id,
-      { role },
-      { new: true }
-    ).select('-password');
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: 'User not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      data: user,
-      message: `User role updated to ${role}`
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update user role',
-      details: error.message
-    });
-  }
-};
-
-// Delete user (Admin only)
-export const deleteUser = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    // Prevent admin from deleting themselves
-    if (req.user?.id === id) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cannot delete your own account'
-      });
-    }
-
-    const user = await User.findByIdAndDelete(id);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: 'User not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'User deleted successfully'
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to delete user',
-      details: error.message
-    });
-  }
-};
-
-// Get task analytics (Admin only)
-export const getTaskAnalytics = async (req: Request, res: Response) => {
-  try {
-    // Basic task statistics
-    const totalTasks = await Task.countDocuments();
-    const completedTasks = await Task.countDocuments({ status: 'completed' });
-    const inProgressTasks = await Task.countDocuments({ status: 'in-progress' });
-    const pendingTasks = await Task.countDocuments({ status: 'pending' });
-
-    // Task completion rate
-    const completionRate = totalTasks > 0 ? (completedTasks / totalTasks * 100).toFixed(1) : 0;
-
-    // Tasks by priority
+    // Get tasks by priority
     const tasksByPriority = await Task.aggregate([
       {
         $group: {
@@ -245,42 +61,309 @@ export const getTaskAnalytics = async (req: Request, res: Response) => {
         }
       }
     ]);
-
-    // Tasks by status with details
-    const tasksByStatus = await Task.aggregate([
+    
+    // Get most active users (users with most tasks)
+    const mostActiveUsers = await Task.aggregate([
       {
         $group: {
-          _id: '$status',
-          count: { $sum: 1 },
-          avgAge: {
-            $avg: {
-              $divide: [
-                { $subtract: [new Date(), '$createdAt'] },
-                1000 * 60 * 60 * 24 // Convert to days
-              ]
-            }
-          }
+          _id: '$assignee',
+          taskCount: { $sum: 1 }
+        }
+      },
+      { $sort: { taskCount: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
+      {
+        $project: {
+          userId: '$_id',
+          taskCount: 1,
+          name: { $arrayElemAt: ['$userInfo.name', 0] },
+          email: { $arrayElemAt: ['$userInfo.email', 0] }
         }
       }
     ]);
+    
+    // Get user roles distribution
+    const usersByRole = await User.aggregate([
+      {
+        $group: {
+          _id: '$role',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    
+    // Calculate completion rate
+    const completedTasks = await Task.countDocuments({ status: 'completed' });
+    const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(2) : '0.00';
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        overview: {
+          totalUsers,
+          newUsersToday,
+          newUsersThisWeek,
+          totalBoards,
+          activeBoards,
+          totalTasks,
+          completionRate: `${completionRate}%`
+        },
+        activeSessions: {
+          count: activeSessions.length,
+          sessions: activeSessions.map(session => ({
+            username: session.username,
+            email: session.email,
+            loginTime: session.loginTime,
+            lastActivity: session.lastActivity,
+            duration: Math.floor((new Date().getTime() - session.loginTime.getTime()) / 1000 / 60), // minutes
+            isActive: true
+          }))
+        },
+        taskAnalytics: {
+          byStatus: tasksByStatus,
+          byPriority: tasksByPriority,
+          total: totalTasks,
+          completed: completedTasks,
+          pending: totalTasks - completedTasks
+        },
+        userAnalytics: {
+          byRole: usersByRole,
+          mostActive: mostActiveUsers
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    // Recent task activity (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+// @desc    Get all users with details (admin view)
+// @route   GET /api/admin/users
+// @access  Admin only
+export const getAllUsersAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    
+    // Get task count for each user
+    const usersWithStats = await Promise.all(
+      users.map(async (user) => {
+        const taskCount = await Task.countDocuments({ assignee: user._id });
+        const completedTasks = await Task.countDocuments({ 
+          assignee: user._id, 
+          status: 'completed' 
+        });
+        const boards = await Board.countDocuments({ 
+          teamMembers: user._id 
+        });
+        
+        return {
+          ...user.toObject(),
+          stats: {
+            totalTasks: taskCount,
+            completedTasks,
+            activeBoards: boards,
+            completionRate: taskCount > 0 ? ((completedTasks / taskCount) * 100).toFixed(2) : '0'
+          }
+        };
+      })
+    );
+    
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: usersWithStats
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    const recentTasks = await Task.find({
-      createdAt: { $gte: sevenDaysAgo }
-    })
-    .populate('createdBy', 'name email')
-    .populate('assignedTo', 'name email')
-    .sort({ createdAt: -1 })
-    .limit(10);
+// @desc    Update user role (promote/demote)
+// @route   PUT /api/admin/users/:id/role
+// @access  Admin only
+export const updateUserRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { role } = req.body;
+    
+    if (!['admin', 'member'].includes(role)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid role. Must be either "admin" or "member"'
+      });
+      return;
+    }
+    
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { role },
+      { new: true, runValidators: true }
+    ).select('-password');
+    
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+      return;
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: `User role updated to ${role}`,
+      data: user
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    // Tasks created per day (last 30 days)
+// @desc    Get system activity log
+// @route   GET /api/admin/activity
+// @access  Admin only
+export const getActivityLog = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    // Get recent boards (last 20)
+    const recentBoards = await Board.find()
+      .sort({ updatedAt: -1 })
+      .limit(20)
+      .populate('createdBy', 'name email')
+      .populate('teamMembers', 'name email');
+    
+    // Get recent tasks (last 20)
+    const recentTasks = await Task.find()
+      .sort({ updatedAt: -1 })
+      .limit(20)
+      .populate('assignee', 'name email')
+      .populate('createdBy', 'name email');
+    
+    // Get recent users (last 10)
+    const recentUsers = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select('-password');
+    
+    // Create activity timeline
+    const activities: any[] = [];
+    
+    recentBoards.forEach(board => {
+      activities.push({
+        type: 'board',
+        action: board.createdAt.getTime() === board.updatedAt.getTime() ? 'created' : 'updated',
+        timestamp: board.updatedAt,
+        user: board.createdBy,
+        details: {
+          boardTitle: board.title,
+          teamSize: board.teamMembers.length
+        }
+      });
+    });
+    
+    recentTasks.forEach(task => {
+      activities.push({
+        type: 'task',
+        action: task.createdAt.getTime() === task.updatedAt.getTime() ? 'created' : 'updated',
+        timestamp: task.updatedAt,
+        user: task.createdBy || task.assignedTo,
+        details: {
+          taskTitle: task.title,
+          status: task.status,
+          priority: task.priority
+        }
+      });
+    });
+    
+    recentUsers.forEach(user => {
+      activities.push({
+        type: 'user',
+        action: 'registered',
+        timestamp: user.createdAt,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email
+        },
+        details: {
+          role: user.role
+        }
+      });
+    });
+    
+    // Sort by timestamp descending
+    activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    
+    res.status(200).json({
+      success: true,
+      count: activities.length,
+      data: activities.slice(0, 30) // Return top 30 activities
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete user (admin only)
+// @route   DELETE /api/admin/users/:id
+// @access  Admin only
+export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    // Prevent admin from deleting themselves
+    if (req.params.id === req.user?._id.toString()) {
+      res.status(400).json({
+        success: false,
+        error: 'Cannot delete your own account'
+      });
+      return;
+    }
+    
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+      return;
+    }
+    
+    // Delete user's tasks
+    await Task.deleteMany({ assignee: user._id });
+    
+    // Remove user from all boards
+    await Board.updateMany(
+      { teamMembers: user._id },
+      { $pull: { teamMembers: user._id } }
+    );
+    
+    // Delete user
+    await user.deleteOne();
+    
+    res.status(200).json({
+      success: true,
+      message: 'User and associated data deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get platform statistics
+// @route   GET /api/admin/stats/platform
+// @access  Admin only
+export const getPlatformStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    // Growth metrics (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const tasksPerDay = await Task.aggregate([
+    
+    const userGrowth = await User.aggregate([
       {
         $match: {
           createdAt: { $gte: thirtyDaysAgo }
@@ -289,270 +372,60 @@ export const getTaskAnalytics = async (req: Request, res: Response) => {
       {
         $group: {
           _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' },
-            day: { $dayOfMonth: '$createdAt' }
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }
           },
           count: { $sum: 1 }
         }
       },
-      {
-        $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 }
-      }
+      { $sort: { _id: 1 } }
     ]);
-
-    // Most productive users
-    const productiveUsers = await Task.aggregate([
-      {
-        $group: {
-          _id: '$createdBy',
-          tasksCreated: { $sum: 1 },
-          tasksCompleted: {
-            $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] }
-          }
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'user'
-        }
-      },
-      {
-        $unwind: '$user'
-      },
-      {
-        $project: {
-          name: '$user.name',
-          email: '$user.email',
-          tasksCreated: 1,
-          tasksCompleted: 1,
-          completionRate: {
-            $cond: [
-              { $gt: ['$tasksCreated', 0] },
-              { $multiply: [{ $divide: ['$tasksCompleted', '$tasksCreated'] }, 100] },
-              0
-            ]
-          }
-        }
-      },
-      {
-        $sort: { tasksCreated: -1 }
-      },
-      {
-        $limit: 10
-      }
-    ]);
-
-    res.json({
-      success: true,
-      data: {
-        overview: {
-          totalTasks,
-          completedTasks,
-          inProgressTasks,
-          pendingTasks,
-          completionRate: `${completionRate}%`
-        },
-        tasksByPriority,
-        tasksByStatus,
-        recentTasks,
-        tasksPerDay,
-        productiveUsers
-      }
-    });
-
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch task analytics',
-      details: error.message
-    });
-  }
-};
-
-// Get board analytics (Admin only)
-export const getBoardAnalytics = async (req: Request, res: Response) => {
-  try {
-    // Basic board statistics
-    const totalBoards = await Board.countDocuments();
-    const publicBoards = await Board.countDocuments({ isPublic: true });
-    const privateBoards = await Board.countDocuments({ isPublic: false });
-
-    // Boards created per month (last 6 months)
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-    const boardsPerMonth = await Board.aggregate([
+    
+    const taskGrowth = await Task.aggregate([
       {
         $match: {
-          createdAt: { $gte: sixMonthsAgo }
+          createdAt: { $gte: thirtyDaysAgo }
         }
       },
       {
         $group: {
           _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' }
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }
           },
           count: { $sum: 1 }
         }
       },
-      {
-        $sort: { '_id.year': 1, '_id.month': 1 }
-      }
+      { $sort: { _id: 1 } }
     ]);
-
-    // Most active boards (by task count)
-    const activeBoardsData = await Board.aggregate([
+    
+    const boardGrowth = await Board.aggregate([
       {
-        $lookup: {
-          from: 'tasks',
-          localField: '_id',
-          foreignField: 'board',
-          as: 'tasks'
+        $match: {
+          createdAt: { $gte: thirtyDaysAgo }
         }
       },
       {
-        $lookup: {
-          from: 'users',
-          localField: 'createdBy',
-          foreignField: '_id',
-          as: 'owner'
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }
+          },
+          count: { $sum: 1 }
         }
       },
-      {
-        $unwind: '$owner'
-      },
-      {
-        $project: {
-          title: 1,
-          owner: '$owner.name',
-          taskCount: { $size: '$tasks' },
-          teamSize: { $size: '$teamMembers' },
-          isPublic: 1,
-          createdAt: 1,
-          completedTasks: {
-            $size: {
-              $filter: {
-                input: '$tasks',
-                cond: { $eq: ['$$this.status', 'completed'] }
-              }
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-          completionRate: {
-            $cond: [
-              { $gt: ['$taskCount', 0] },
-              { $multiply: [{ $divide: ['$completedTasks', '$taskCount'] }, 100] },
-              0
-            ]
-          }
-        }
-      },
-      {
-        $sort: { taskCount: -1 }
-      },
-      {
-        $limit: 10
-      }
+      { $sort: { _id: 1 } }
     ]);
-
-    res.json({
+    
+    res.status(200).json({
       success: true,
       data: {
-        overview: {
-          totalBoards,
-          publicBoards,
-          privateBoards
-        },
-        boardsPerMonth,
-        activeBoards: activeBoardsData
-      }
-    });
-
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch board analytics',
-      details: error.message
-    });
-  }
-};
-
-// Get system analytics (Admin only)
-export const getSystemAnalytics = async (req: Request, res: Response) => {
-  try {
-    const now = new Date();
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    // System overview
-    const totalUsers = await User.countDocuments();
-    const totalTasks = await Task.countDocuments();
-    const totalBoards = await Board.countDocuments();
-
-    // Growth metrics (last 30 days vs previous 30 days)
-    const sixtyDaysAgo = new Date();
-    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-
-    const recentUsers = await User.countDocuments({
-      createdAt: { $gte: thirtyDaysAgo }
-    });
-
-    const previousPeriodUsers = await User.countDocuments({
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
-    });
-
-    const userGrowthRate = previousPeriodUsers > 0 
-      ? ((recentUsers - previousPeriodUsers) / previousPeriodUsers * 100).toFixed(1)
-      : '100';
-
-    // Daily active metrics (simulated - you could track login times)
-    const activeUsers = await User.countDocuments({
-      updatedAt: { $gte: thirtyDaysAgo }
-    });
-
-    // Average tasks per user
-    const avgTasksPerUser = totalUsers > 0 ? (totalTasks / totalUsers).toFixed(1) : '0';
-
-    // System health metrics
-    const systemHealth = {
-      databaseConnected: true, // You could implement actual health checks
-      emailServiceStatus: 'operational',
-      apiResponseTime: '< 200ms', // You could implement actual monitoring
-      uptime: '99.9%'
-    };
-
-    res.json({
-      success: true,
-      data: {
-        overview: {
-          totalUsers,
-          totalTasks,
-          totalBoards,
-          activeUsers: `${activeUsers} (30 days)`,
-          avgTasksPerUser
-        },
         growth: {
-          newUsers: recentUsers,
-          userGrowthRate: `${userGrowthRate}%`,
-          period: 'Last 30 days vs previous 30 days'
+          users: userGrowth,
+          tasks: taskGrowth,
+          boards: boardGrowth
         },
-        systemHealth
+        period: '30 days'
       }
     });
-
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch system analytics',
-      details: error.message
-    });
+  } catch (error) {
+    next(error);
   }
 };

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Hackathon Helper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        .response.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+        .response.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+        .token-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .copy-btn {
+            margin-top: 10px;
+            background: #28a745;
+            font-size: 14px;
+            padding: 8px 16px;
+            width: auto;
+        }
+        .demo-credentials {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .demo-credentials strong {
+            color: #533f03;
+        }
+        .links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .links a {
+            display: block;
+            color: #667eea;
+            text-decoration: none;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Admin Login</h1>
+        <p class="subtitle">Login to access the admin dashboard</p>
+
+        <div class="demo-credentials">
+            <strong>🎉 Demo Admin Credentials:</strong><br>
+            📧 Email: <strong>admin@hackathon.com</strong><br>
+            🔑 Password: <strong>admin123</strong>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" value="admin@hackathon.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" value="admin123" required>
+            </div>
+            <button type="submit">Login & Get Token</button>
+        </form>
+
+        <div id="response" class="response"></div>
+
+        <div class="links">
+            <strong>📚 Admin Endpoints:</strong>
+            <a href="http://localhost:5000/health" target="_blank">🔗 Health Check</a>
+            <a href="#" id="dashboardLink">🔗 Dashboard (Click after login)</a>
+            <a href="#" id="usersLink">🔗 All Users (Click after login)</a>
+            <a href="#" id="activityLink">🔗 Activity Log (Click after login)</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const responseDiv = document.getElementById('response');
+        let authToken = '';
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            responseDiv.textContent = 'Logging in...';
+            responseDiv.className = 'response';
+            responseDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                
+                // Handle the response structure (with success/data wrapper)
+                const data = result.data || result;
+                const token = data.token;
+                const user = data.user;
+
+                if (response.ok && token) {
+                    authToken = token;
+                    localStorage.setItem('authToken', authToken);
+
+                    responseDiv.className = 'response success';
+                    responseDiv.innerHTML = `
+                        <strong>✅ Login Successful!</strong><br><br>
+                        <strong>User:</strong> ${user.name} (${user.role})<br>
+                        <strong>Email:</strong> ${user.email}<br><br>
+                        <strong>JWT Token:</strong>
+                        <div class="token-box" id="tokenBox">${authToken}</div>
+                        <button class="copy-btn" onclick="copyToken()">📋 Copy Token</button>
+                        <br><br>
+                        <strong>🎉 Now you can access admin endpoints!</strong><br>
+                        Click the links below to test them.
+                    `;
+
+                    // Update links
+                    updateLinks(authToken);
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `
+                        <strong>❌ Login Failed</strong><br>
+                        ${result.error || data.error || 'Invalid credentials'}
+                    `;
+                }
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `
+                    <strong>❌ Error</strong><br>
+                    ${error.message}<br><br>
+                    Make sure the backend server is running on http://localhost:5000
+                `;
+            }
+        });
+
+        function updateLinks(token) {
+            const headers = { 'Authorization': `Bearer ${token}` };
+            
+            document.getElementById('dashboardLink').onclick = (e) => {
+                e.preventDefault();
+                testEndpoint('http://localhost:5000/api/admin/dashboard', token);
+            };
+            
+            document.getElementById('usersLink').onclick = (e) => {
+                e.preventDefault();
+                testEndpoint('http://localhost:5000/api/admin/users', token);
+            };
+            
+            document.getElementById('activityLink').onclick = (e) => {
+                e.preventDefault();
+                testEndpoint('http://localhost:5000/api/admin/activity', token);
+            };
+        }
+
+        async function testEndpoint(url, token) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                const newWindow = window.open('', '_blank');
+                newWindow.document.write('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function copyToken() {
+            const tokenBox = document.getElementById('tokenBox');
+            const textArea = document.createElement('textarea');
+            textArea.value = authToken;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            alert('✅ Token copied to clipboard!');
+        }
+
+        // Check if there's a saved token
+        window.onload = () => {
+            const savedToken = localStorage.getItem('authToken');
+            if (savedToken) {
+                authToken = savedToken;
+                updateLinks(savedToken);
+            }
+        };
+    </script>
+</body>
+</html>

@@ -4,8 +4,10 @@ export const connectDB = async (): Promise<void> => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/hackathon-helper';
     
+    console.log('🔄 Attempting to connect to MongoDB...');
+    
     const conn = await mongoose.connect(mongoURI, {
-      // Remove deprecated options, mongoose 6+ handles these automatically
+      serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
     });
 
     console.log(`🍃 MongoDB Connected: ${conn.connection.host}`);
@@ -27,7 +29,11 @@ export const connectDB = async (): Promise<void> => {
     });
 
   } catch (error) {
-    console.error('❌ Error connecting to MongoDB:', error);
-    process.exit(1);
+    console.error('❌ MongoDB connection failed:', error instanceof Error ? error.message : error);
+    console.log('💡 To fix this:');
+    console.log('   1. Install MongoDB: https://www.mongodb.com/try/download/community');
+    console.log('   2. Start MongoDB service');
+    console.log('   3. Or use MongoDB Atlas (cloud): https://www.mongodb.com/cloud/atlas');
+    throw error; // Re-throw so server.ts can catch it
   }
 };
