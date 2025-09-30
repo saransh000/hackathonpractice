@@ -13,10 +13,8 @@ const DEMO_USERS: User[] = [
 ];
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  // Always start with no user - require login every time
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('registeredUsers');
@@ -26,50 +24,84 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if email exists in registered users (password is ignored for demo)
-    const foundUser = registeredUsers.find(u => u.email.toLowerCase() === credentials.email.toLowerCase());
-    
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('user', JSON.stringify(foundUser));
+    try {
+      // Make real API call to backend
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Login failed');
+      }
+
+      // Create user object from backend response
+      const loggedInUser: User = {
+        id: result.data.user.id,
+        name: result.data.user.name,
+        email: result.data.user.email,
+        role: result.data.user.role,
+      };
+
+      setUser(loggedInUser);
+      localStorage.setItem('user', JSON.stringify(loggedInUser));
+      localStorage.setItem('token', result.data.token); // Store JWT token
       setIsLoading(false);
-    } else {
+    } catch (error: any) {
       setIsLoading(false);
-      throw new Error('Invalid credentials. User not found.');
+      throw new Error(error.message || 'Invalid credentials');
     }
   };
 
   const signup = async (data: SignupData) => {
     setIsLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if email already exists
-    const emailExists = registeredUsers.some(u => u.email.toLowerCase() === data.email.toLowerCase());
-    
-    if (emailExists) {
+    try {
+      // Make real API call to backend
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Registration failed');
+      }
+
+      // Create user object from backend response
+      const newUser: User = {
+        id: result.data.user.id,
+        name: result.data.user.name,
+        email: result.data.user.email,
+        role: result.data.user.role,
+      };
+
+      // Update registered users list
+      const updatedUsers = [...registeredUsers, newUser];
+      setRegisteredUsers(updatedUsers);
+      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      
       setIsLoading(false);
-      throw new Error('Email already registered');
+    } catch (error: any) {
+      setIsLoading(false);
+      throw new Error(error.message || 'Registration failed');
     }
-
-    // Create new user
-    const newUser: User = {
-      id: Date.now().toString(),
-      name: data.name,
-      email: data.email,
-      role: 'member',
-    };
-
-    // Update registered users
-    const updatedUsers = [...registeredUsers, newUser];
-    setRegisteredUsers(updatedUsers);
-    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
-    
-    setIsLoading(false);
   };
 
   const logout = () => {
