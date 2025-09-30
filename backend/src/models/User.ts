@@ -8,10 +8,13 @@ export interface IUser extends Document {
   password: string;
   avatar?: string;
   role: 'admin' | 'member';
+  passwordResetToken?: string;
+  passwordResetExpire?: Date;
   createdAt: Date;
   updatedAt: Date;
   matchPassword(enteredPassword: string): Promise<boolean>;
   getSignedJwtToken(): string;
+  getResetPasswordToken(): string;
 }
 
 const userSchema = new Schema<IUser>({
@@ -45,6 +48,14 @@ const userSchema = new Schema<IUser>({
     type: String,
     enum: ['admin', 'member'],
     default: 'member'
+  },
+  passwordResetToken: {
+    type: String,
+    select: false
+  },
+  passwordResetExpire: {
+    type: Date,
+    select: false
   }
 }, {
   timestamps: true
@@ -71,6 +82,23 @@ userSchema.methods.getSignedJwtToken = function(): string {
 // Match user entered password to hashed password in database
 userSchema.methods.matchPassword = async function(enteredPassword: string): Promise<boolean> {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Generate and hash password reset token
+userSchema.methods.getResetPasswordToken = function(): string {
+  // Generate token
+  const resetToken = require('crypto').randomBytes(20).toString('hex');
+
+  // Hash token and set to resetPasswordToken field
+  this.passwordResetToken = require('crypto')
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Set expire time (10 minutes)
+  this.passwordResetExpire = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 export const User = mongoose.model<IUser>('User', userSchema);
