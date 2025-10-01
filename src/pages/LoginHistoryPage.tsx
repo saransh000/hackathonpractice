@@ -50,7 +50,8 @@ export const LoginHistoryPage: React.FC = () => {
       const token = window.localStorage.getItem('token') || '';
       
       // Fetch login sessions
-      const sessionsResponse = await fetch('http://172.26.81.221:5000/api/admin/login-history?limit=50', {
+  const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
+  const sessionsResponse = await fetch(`${API_BASE}/api/admin/login-history?limit=50`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ export const LoginHistoryPage: React.FC = () => {
       });
 
       // Fetch login statistics
-      const statsResponse = await fetch('http://172.26.81.221:5000/api/admin/login-stats', {
+  const statsResponse = await fetch(`${API_BASE}/api/admin/login-stats`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

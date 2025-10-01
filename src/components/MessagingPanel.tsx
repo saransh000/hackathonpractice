@@ -34,7 +34,7 @@ interface Conversation {
   unreadCount: number;
 }
 
-const API_URL = 'http://172.26.81.221:5000/api';
+const API_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
 
 export const MessagingPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

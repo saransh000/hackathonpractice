@@ -1,4 +1,4 @@
- import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User, LoginCredentials, AuthContextType, SignupData } from '../types/auth';
 
@@ -25,8 +25,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     
     try {
-      // Make real API call to backend
-      const response = await fetch('http://172.26.81.221:5000/api/auth/login', {
+      // Make real API call to backend (use Vite env variable or fallback to localhost)
+      const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +67,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       // Make real API call to backend
-      const response = await fetch('http://172.26.81.221:5000/api/auth/register', {
+      const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
+      const response = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +111,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Call backend logout endpoint
       const token = window.localStorage.getItem('token');
       if (token) {
-        await fetch('http://172.26.81.221:5000/api/auth/logout', {
+        const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
+        await fetch(`${API_BASE}/api/auth/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

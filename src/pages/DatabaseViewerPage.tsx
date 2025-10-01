@@ -38,7 +38,8 @@ export const DatabaseViewerPage: React.FC = () => {
     try {
       // Fetch all users from backend
       const token = window.localStorage.getItem('token') || '';
-      const response = await fetch('http://172.26.81.221:5000/api/admin/users', {
+  const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
+  const response = await fetch(`${API_BASE}/api/admin/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
