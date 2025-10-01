@@ -153,9 +153,11 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onBackToLogin }) => {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                <UserPlus className="h-8 w-8 text-white" />
-              </div>
+              <img 
+                src="/hackathon-helper-logo.png" 
+                alt="Hackathon Helper" 
+                className="w-32 h-32 object-contain drop-shadow-xl"
+              />
             </div>
             <h1 className="text-3xl font-display font-black gradient-text mb-2 tracking-tight">Create Account</h1>
             <p className="text-gray-600 dark:text-gray-400 font-normal">

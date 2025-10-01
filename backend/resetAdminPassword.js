@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost/hackathon-helper')
+mongoose.connect('mongodb://127.0.0.1:27017/hackathon-helper')
   .then(async () => {
     console.log('🔌 Connected to MongoDB');
 

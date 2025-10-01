@@ -43,40 +43,66 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-900">
-      {/* Background Pattern */}
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-900 relative overflow-hidden">
+      {/* Animated Background Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-3xl"></div>
+        {/* Large animated gradient orbs */}
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-400/10 dark:bg-purple-600/5 rounded-full blur-3xl animate-pulse-slow"></div>
+        
+        {/* Floating particles */}
+        <div className="absolute top-20 left-20 w-2 h-2 bg-blue-400 dark:bg-blue-300 rounded-full animate-float-particle"></div>
+        <div className="absolute top-40 right-32 w-3 h-3 bg-indigo-400 dark:bg-indigo-300 rounded-full animate-float-particle-delayed"></div>
+        <div className="absolute bottom-32 left-1/4 w-2 h-2 bg-purple-400 dark:bg-purple-300 rounded-full animate-float-particle-slow"></div>
+        <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-cyan-400 dark:bg-cyan-300 rounded-full animate-float-particle"></div>
+        <div className="absolute bottom-1/4 right-20 w-3 h-3 bg-pink-400 dark:bg-pink-300 rounded-full animate-float-particle-delayed"></div>
+        
+        {/* Circuit-like lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-10 dark:opacity-5" style={{ animationDelay: '2s' }}>
+          <line x1="0" y1="50%" x2="100%" y2="50%" stroke="currentColor" strokeWidth="1" className="text-blue-500 animate-draw-line" strokeDasharray="10,10" />
+          <line x1="50%" y1="0" x2="50%" y2="100%" stroke="currentColor" strokeWidth="1" className="text-indigo-500 animate-draw-line" strokeDasharray="10,10" style={{ animationDelay: '0.5s' }} />
+        </svg>
       </div>
 
       <div className="w-full max-w-6xl flex gap-8 items-center relative z-10">
         {/* Left Side - Branding */}
-        <div className="hidden lg:flex flex-1 flex-col gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                <Sparkles className="h-8 w-8 text-white" />
+        <div className="hidden lg:flex flex-1 flex-col gap-8 animate-fade-in-left">
+          <div className="space-y-6">
+            {/* New Logo with pulse glow effect */}
+            <div className="flex flex-col items-center justify-center mb-8 relative">
+              {/* Glowing ring behind logo */}
+              <div className="absolute inset-0 w-64 h-64 mx-auto">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 blur-2xl animate-pulse-glow"></div>
               </div>
-              <h1 className="text-4xl font-display font-black bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent tracking-tight">
-                Hackathon Helper
-              </h1>
+              <img 
+                src="/hackathon-helper-logo.png" 
+                alt="Hackathon Helper" 
+                className="w-64 h-64 object-contain drop-shadow-2xl animate-float relative z-10 hover:scale-110 transition-transform duration-500"
+              />
+              {/* Sparkle effects */}
+              <div className="absolute top-10 left-10 w-4 h-4 animate-sparkle">
+                <Sparkles className="w-4 h-4 text-yellow-400" />
+              </div>
+              <div className="absolute bottom-20 right-10 w-3 h-3 animate-sparkle-delayed">
+                <Sparkles className="w-3 h-3 text-blue-400" />
+              </div>
             </div>
-            <p className="text-xl text-gray-600 dark:text-gray-400 font-light">
+            <p className="text-xl text-center text-gray-600 dark:text-gray-400 font-light animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               Organize your hackathon projects with ease
             </p>
           </div>
 
-          <div className="space-y-4">
-            <Feature icon={<CheckCircle className="h-5 w-5" />} text="Drag & drop task management" />
-            <Feature icon={<CheckCircle className="h-5 w-5" />} text="Real-time team collaboration" />
-            <Feature icon={<CheckCircle className="h-5 w-5" />} text="Beautiful dark mode interface" />
-            <Feature icon={<CheckCircle className="h-5 w-5" />} text="Priority-based task organization" />
+          <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <Feature icon={<CheckCircle className="h-5 w-5" />} text="Drag & drop task management" delay="0.5s" />
+            <Feature icon={<CheckCircle className="h-5 w-5" />} text="Real-time team collaboration" delay="0.6s" />
+            <Feature icon={<CheckCircle className="h-5 w-5" />} text="Beautiful dark mode interface" delay="0.7s" />
+            <Feature icon={<CheckCircle className="h-5 w-5" />} text="Priority-based task organization" delay="0.8s" />
           </div>
 
-          <div className="p-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div className="p-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:shadow-lg hover:scale-105 animate-fade-in-up" style={{ animationDelay: '0.9s' }}>
             <div className="flex items-center gap-3 mb-3">
-              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400 animate-bounce-subtle" />
               <span className="font-semibold text-gray-900 dark:text-gray-100">Join 1,000+ Teams</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -86,19 +112,26 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Right Side - Login Form */}
-        <div className="flex-1 max-w-md w-full">
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-8 transition-all duration-300">
-            <div className="text-center mb-8">
-              <div className="inline-flex p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4 lg:hidden">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
-              <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
-                Welcome Back
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 font-normal">
-                Sign in to manage your hackathon projects
-              </p>
+        <div className="flex-1 max-w-md w-full animate-fade-in-right">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 p-8 transition-all duration-300 hover:shadow-blue-500/20 hover:shadow-3xl hover:border-blue-300 dark:hover:border-blue-700 relative overflow-hidden group">
+            {/* Animated gradient border on hover */}
+            <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 animate-gradient"></div>
             </div>
+            
+            <div className="relative z-10">
+              <div className="text-center mb-8 animate-fade-in-up">
+                <div className="inline-flex p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4 lg:hidden animate-bounce-subtle">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
+                  <span className="inline-block hover:scale-110 transition-transform duration-300">Welcome</span>{' '}
+                  <span className="inline-block hover:scale-110 transition-transform duration-300" style={{ transitionDelay: '50ms' }}>Back</span>
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 font-normal">
+                  Sign in to manage your hackathon projects
+                </p>
+              </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
@@ -202,15 +235,16 @@ export const LoginPage: React.FC = () => {
                 Don't have an account?{' '}
                 <button 
                   onClick={() => setShowSignup(true)}
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold hover:scale-110 transition-transform duration-300 inline-block"
                 >
                   Sign up
                 </button>
               </p>
             </div>
+            </div>
           </div>
 
-          <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-500">
+          <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-500 animate-fade-in-up" style={{ animationDelay: '1.2s' }}>
             By signing in, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>
@@ -219,9 +253,9 @@ export const LoginPage: React.FC = () => {
   );
 };
 
-const Feature: React.FC<{ icon: React.ReactNode; text: string }> = ({ icon, text }) => (
-  <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-    <div className="text-green-600 dark:text-green-400">{icon}</div>
-    <span>{text}</span>
+const Feature: React.FC<{ icon: React.ReactNode; text: string; delay?: string }> = ({ icon, text, delay = '0s' }) => (
+  <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300 animate-fade-in-left group hover:translate-x-2 transition-all duration-300" style={{ animationDelay: delay }}>
+    <div className="text-green-600 dark:text-green-400 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300">{icon}</div>
+    <span className="group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">{text}</span>
   </div>
 );
