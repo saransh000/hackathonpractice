@@ -35,9 +35,9 @@ export const Header: React.FC<HeaderProps> = ({
   if (!user) return null;
 
   return (
-    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4 transition-colors duration-300">
+    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4 transition-colors duration-300 relative z-40">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3 relative" ref={dropdownRef}>
+        <div className="flex items-center gap-3 relative z-50" ref={dropdownRef}>
           <button
             onClick={() => setShowUserDropdown(!showUserDropdown)}
             className="flex items-center gap-3 hover:opacity-80 transition-all duration-200 cursor-pointer group"
@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* User Details Dropdown */}
           {showUserDropdown && (
-            <div className="absolute top-full left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden animate-fade-in-up">
+            <div className="absolute top-full left-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[9999] overflow-hidden animate-fade-in-up">
               {/* Header */}
               <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 p-6 text-white">
                 <div className="flex items-center gap-4">
