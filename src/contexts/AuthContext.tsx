@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+ import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User, LoginCredentials, AuthContextType, SignupData } from '../types/auth';
 
@@ -21,13 +21,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return saved ? JSON.parse(saved) : [...DEMO_USERS];
   });
 
+  // Get the API base URL dynamically
+  const getApiBaseUrl = () => {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = '5000'; // Backend port
+    return `${protocol}//${hostname}:${port}`;
+  };
+
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
     
     try {
-      // Make real API call to backend (use Vite env variable or fallback to localhost)
-      const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
-      const response = await fetch(`${API_BASE}/api/auth/login`, {
+      // Make real API call to backend
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,8 +74,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       // Make real API call to backend
-      const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
-      const response = await fetch(`${API_BASE}/api/auth/register`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,8 +117,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Call backend logout endpoint
       const token = window.localStorage.getItem('token');
       if (token) {
-        const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
-        await fetch(`${API_BASE}/api/auth/logout`, {
+        await fetch(`${getApiBaseUrl()}/api/auth/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

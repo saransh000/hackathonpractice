@@ -42,6 +42,13 @@ export const LoginHistoryPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
+  const getApiBaseUrl = () => {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = '5000';
+    return `${protocol}//${hostname}:${port}`;
+  };
+
   const fetchLoginData = async () => {
     setIsLoading(true);
     setError(null);
@@ -50,8 +57,7 @@ export const LoginHistoryPage: React.FC = () => {
       const token = window.localStorage.getItem('token') || '';
       
       // Fetch login sessions
-  const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
-  const sessionsResponse = await fetch(`${API_BASE}/api/admin/login-history?limit=50`, {
+      const sessionsResponse = await fetch(`${getApiBaseUrl()}/api/admin/login-history?limit=50`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +66,7 @@ export const LoginHistoryPage: React.FC = () => {
       });
 
       // Fetch login statistics
-  const statsResponse = await fetch(`${API_BASE}/api/admin/login-stats`, {
+      const statsResponse = await fetch(`${getApiBaseUrl()}/api/admin/login-stats`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

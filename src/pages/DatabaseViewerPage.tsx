@@ -31,6 +31,13 @@ export const DatabaseViewerPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
+  const getApiBaseUrl = () => {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = '5000';
+    return `${protocol}//${hostname}:${port}`;
+  };
+
   const fetchDatabaseData = async () => {
     setIsLoading(true);
     setError(null);
@@ -38,8 +45,7 @@ export const DatabaseViewerPage: React.FC = () => {
     try {
       // Fetch all users from backend
       const token = window.localStorage.getItem('token') || '';
-  const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:5000';
-  const response = await fetch(`${API_BASE}/api/admin/users`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
