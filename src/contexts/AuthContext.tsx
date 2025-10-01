@@ -51,8 +51,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     
     try {
+      const apiUrl = `${getApiBaseUrl()}/api/auth/login`;
+      console.log('🔐 Attempting login to:', apiUrl);
+      console.log('📧 Email:', credentials.email);
+      console.log('🔑 Password length:', credentials.password?.length);
+      
       // Make real API call to backend
-      const response = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,9 +68,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }),
       });
 
+      console.log('📡 Response status:', response.status);
       const result = await response.json();
+      console.log('📦 Response data:', result);
 
       if (!response.ok) {
+        console.error('❌ Login failed:', result.error);
         throw new Error(result.error || 'Login failed');
       }
 
@@ -77,6 +85,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         role: result.data.user.role,
       };
 
+      console.log('✅ Login successful:', loggedInUser);
       setUser(loggedInUser);
       if (typeof window !== 'undefined') {
         window.localStorage.setItem('user', JSON.stringify(loggedInUser));
@@ -84,6 +93,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       setIsLoading(false);
     } catch (error: any) {
+      console.error('💥 Login error:', error);
       setIsLoading(false);
       throw new Error(error.message || 'Invalid credentials');
     }

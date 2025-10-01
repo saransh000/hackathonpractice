@@ -37,9 +37,16 @@ export const LoginPage: React.FC = () => {
     { name: 'Emma Davis', email: 'emma@hackathon.com', role: 'Member' },
   ];
 
-  const quickLogin = (email: string) => {
+  const quickLogin = async (email: string) => {
     setCredentials({ email, password: 'demo123' });
     setError('');
+    
+    // Automatically submit the login
+    try {
+      await login({ email, password: 'demo123' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    }
   };
 
   return (
@@ -206,7 +213,7 @@ export const LoginPage: React.FC = () => {
               {showDemo && (
                 <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 space-y-2 animate-slide-up">
                   <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                    Click any email to quick login (password not required for demo):
+                    Click any demo account to login instantly (Password: demo123):
                   </p>
                   {demoUsers.map((user) => (
                     <button

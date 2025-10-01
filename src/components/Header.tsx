@@ -1,20 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LogOut, Database, Activity, User, Mail, Shield, Calendar } from 'lucide-react';
+import { LogOut, Database, Activity, User, Mail, Shield, Calendar, Users } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   onNavigateToDatabase?: () => void;
   onNavigateToLoginHistory?: () => void;
+  onNavigateToTeams?: () => void;
   showDatabaseButton?: boolean;
   showLoginHistoryButton?: boolean;
+  showTeamsButton?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
   onNavigateToDatabase, 
   onNavigateToLoginHistory,
+  onNavigateToTeams,
   showDatabaseButton = false,
-  showLoginHistoryButton = false
+  showLoginHistoryButton = false,
+  showTeamsButton = false
 }) => {
   const { user, logout } = useAuth();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -153,6 +157,16 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Activity className="h-4 w-4" />
               <span className="hidden sm:inline">Login Activity</span>
+            </button>
+          )}
+          {showTeamsButton && onNavigateToTeams && (
+            <button
+              onClick={onNavigateToTeams}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-lg transition-all duration-200 font-semibold shadow-lg"
+              title="Team Collaboration"
+            >
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Teams</span>
             </button>
           )}
           <ThemeToggle />

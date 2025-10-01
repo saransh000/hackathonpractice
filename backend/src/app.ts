@@ -13,6 +13,7 @@ import boardRoutes from './routes/boards';
 import userRoutes from './routes/users';
 import adminRoutes from './routes/admin';
 import messageRoutes from './routes/messages';
+import teamRoutes from './routes/teams';
 
 const createApp = () => {
   const app = express();
@@ -68,6 +69,7 @@ const createApp = () => {
   app.use('/api/users', userRoutes);
   app.use('/api/admin', adminLimiter, adminRoutes);
   app.use('/api/messages', messageRoutes);
+  app.use('/api/teams', teamRoutes);
 
   // Error handling middleware
   app.use(notFound);
