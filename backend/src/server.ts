@@ -5,7 +5,7 @@ import createApp from './app';
 // Load environment variables
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 
 // Create app first
 const app = createApp();
@@ -16,8 +16,8 @@ connectDB().catch((err) => {
   console.log('💡 You can still test the API structure, but database operations will fail');
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server - Force IPv4 by binding to 0.0.0.0
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 CORS Origin: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
