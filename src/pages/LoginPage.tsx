@@ -125,8 +125,7 @@ export const LoginPage: React.FC = () => {
                   <Sparkles className="h-8 w-8 text-white" />
                 </div>
                 <h2 className="text-3xl font-display font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
-                  <span className="inline-block hover:scale-110 transition-transform duration-300">Welcome</span>{' '}
-                  <span className="inline-block hover:scale-110 transition-transform duration-300" style={{ transitionDelay: '50ms' }}>Back</span>
+                  <span className="inline-block hover:scale-110 transition-transform duration-300">Welcome</span>
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 font-normal">
                   Sign in to manage your hackathon projects
