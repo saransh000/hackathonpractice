@@ -8,7 +8,7 @@ const generateInviteCode = (): string => {
 };
 
 // Create a new team
-export const createTeam = async (req: Request, res: Response) => {
+export const createTeam = async (req: Request, res: Response): Promise<any> => {
   try {
     const { name, description } = req.body;
     const userId = req.user?.id;
@@ -77,7 +77,7 @@ export const getMyTeams = async (req: Request, res: Response) => {
 };
 
 // Get team by ID
-export const getTeamById = async (req: Request, res: Response) => {
+export const getTeamById = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
@@ -118,7 +118,7 @@ export const getTeamById = async (req: Request, res: Response) => {
 };
 
 // Join team using invite code
-export const joinTeam = async (req: Request, res: Response) => {
+export const joinTeam = async (req: Request, res: Response): Promise<any> => {
   try {
     const { inviteCode } = req.body;
     const userId = req.user?.id;
@@ -168,7 +168,7 @@ export const joinTeam = async (req: Request, res: Response) => {
 };
 
 // Leave team
-export const leaveTeam = async (req: Request, res: Response) => {
+export const leaveTeam = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
@@ -209,7 +209,7 @@ export const leaveTeam = async (req: Request, res: Response) => {
 };
 
 // Remove member from team (owner only)
-export const removeMember = async (req: Request, res: Response) => {
+export const removeMember = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id, memberId } = req.params;
     const userId = req.user?.id;
@@ -261,7 +261,7 @@ export const removeMember = async (req: Request, res: Response) => {
 };
 
 // Delete team (owner only)
-export const deleteTeam = async (req: Request, res: Response) => {
+export const deleteTeam = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
@@ -298,7 +298,7 @@ export const deleteTeam = async (req: Request, res: Response) => {
 };
 
 // Regenerate invite code (owner only)
-export const regenerateInviteCode = async (req: Request, res: Response) => {
+export const regenerateInviteCode = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
