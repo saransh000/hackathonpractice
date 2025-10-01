@@ -1,4 +1,4 @@
-export const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+export const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://172.26.81.221:5000';
 
 export async function http<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${apiBase}${path}`, {

@@ -1,14 +1,21 @@
 import React from 'react';
-import { LogOut, Database } from 'lucide-react';
+import { LogOut, Database, Activity } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   onNavigateToDatabase?: () => void;
+  onNavigateToLoginHistory?: () => void;
   showDatabaseButton?: boolean;
+  showLoginHistoryButton?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigateToDatabase, showDatabaseButton = false }) => {
+export const Header: React.FC<HeaderProps> = ({ 
+  onNavigateToDatabase, 
+  onNavigateToLoginHistory,
+  showDatabaseButton = false,
+  showLoginHistoryButton = false
+}) => {
   const { user, logout } = useAuth();
 
   if (!user) return null;
@@ -40,6 +47,16 @@ export const Header: React.FC<HeaderProps> = ({ onNavigateToDatabase, showDataba
             >
               <Database className="h-4 w-4" />
               <span className="hidden sm:inline">Database</span>
+            </button>
+          )}
+          {user.role === 'admin' && showLoginHistoryButton && onNavigateToLoginHistory && (
+            <button
+              onClick={onNavigateToLoginHistory}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white rounded-lg transition-all duration-200 font-semibold shadow-lg"
+              title="View Login History"
+            >
+              <Activity className="h-4 w-4" />
+              <span className="hidden sm:inline">Login Activity</span>
             </button>
           )}
           <ThemeToggle />

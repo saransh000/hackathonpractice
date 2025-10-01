@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+ import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User, LoginCredentials, AuthContextType, SignupData } from '../types/auth';
 
@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       // Make real API call to backend
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('http://172.26.81.221:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       // Make real API call to backend
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch('http://172.26.81.221:5000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,9 +104,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      // Call backend logout endpoint
+      const token = window.localStorage.getItem('token');
+      if (token) {
+        await fetch('http://172.26.81.221:5000/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+      }
+    } catch (error) {
+      // Continue with logout even if API call fails
+      console.error('Logout API error:', error);
+    } finally {
+      // Clear local storage and state
+      setUser(null);
+      window.localStorage.removeItem('user');
+      window.localStorage.removeItem('token');
+    }
   };
 
   return (

@@ -21,7 +21,7 @@ const createApp = () => {
   app.use(helmet());
   app.use(compression());
   app.use(cors({
-    origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+    origin: true, // Allow all origins for development
     credentials: true,
   }));
   

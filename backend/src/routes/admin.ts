@@ -5,7 +5,9 @@ import {
   updateUserRole,
   getActivityLog,
   deleteUser,
-  getPlatformStats
+  getPlatformStats,
+  getLoginHistory,
+  getLoginStats
 } from '../controllers/adminController';
 import { protect, adminOnly, trackActivity } from '../middleware/auth';
 
@@ -20,6 +22,10 @@ router.use(trackActivity);
 router.get('/dashboard', getDashboardStats);
 router.get('/stats/platform', getPlatformStats);
 router.get('/activity', getActivityLog);
+
+// Login tracking
+router.get('/login-history', getLoginHistory);
+router.get('/login-stats', getLoginStats);
 
 // User management
 router.get('/users', getAllUsersAdmin);

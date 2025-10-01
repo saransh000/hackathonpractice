@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { User } from '../models/User';
 import { Board } from '../models/Board';
 import { Task } from '../models/Task';
+import LoginSession from '../models/LoginSession';
 import { getActiveSessions } from '../middleware/auth';
 
 // @desc    Get admin dashboard statistics
@@ -423,6 +424,161 @@ export const getPlatformStats = async (req: Request, res: Response, next: NextFu
           boards: boardGrowth
         },
         period: '30 days'
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get login history
+// @route   GET /api/admin/login-history
+// @access  Admin only
+export const getLoginHistory = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 100;
+    const page = parseInt(req.query.page as string) || 1;
+    const skip = (page - 1) * limit;
+
+    // Get login sessions with user details
+    const sessions = await LoginSession.find()
+      .populate('user', 'name email role avatar')
+      .sort({ loginTime: -1 })
+      .limit(limit)
+      .skip(skip);
+
+    const totalSessions = await LoginSession.countDocuments();
+
+    res.status(200).json({
+      success: true,
+      data: sessions,
+      pagination: {
+        total: totalSessions,
+        page,
+        limit,
+        pages: Math.ceil(totalSessions / limit)
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get login statistics
+// @route   GET /api/admin/login-stats
+// @access  Admin only
+export const getLoginStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    // Get total logins
+    const totalLogins = await LoginSession.countDocuments();
+
+    // Get active sessions (not logged out)
+    const activeSessions = await LoginSession.countDocuments({ isActive: true });
+
+    // Get logins today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const loginsToday = await LoginSession.countDocuments({
+      loginTime: { $gte: today }
+    });
+
+    // Get logins this week
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const loginsThisWeek = await LoginSession.countDocuments({
+      loginTime: { $gte: weekAgo }
+    });
+
+    // Get unique users who logged in today
+    const uniqueUsersToday = await LoginSession.distinct('user', {
+      loginTime: { $gte: today }
+    });
+
+    // Get average session duration
+    const avgSessionData = await LoginSession.aggregate([
+      {
+        $match: {
+          sessionDuration: { $ne: null, $gt: 0 }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgDuration: { $avg: '$sessionDuration' }
+        }
+      }
+    ]);
+
+    const avgSessionDuration = avgSessionData.length > 0 
+      ? Math.round(avgSessionData[0].avgDuration) 
+      : 0;
+
+    // Get login activity by hour (last 24 hours)
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+    
+    const loginsByHour = await LoginSession.aggregate([
+      {
+        $match: {
+          loginTime: { $gte: twentyFourHoursAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $hour: '$loginTime'
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Get most active users (top 10)
+    const mostActiveUsers = await LoginSession.aggregate([
+      {
+        $group: {
+          _id: '$user',
+          loginCount: { $sum: 1 },
+          lastLogin: { $max: '$loginTime' }
+        }
+      },
+      { $sort: { loginCount: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userInfo'
+        }
+      },
+      {
+        $unwind: '$userInfo'
+      },
+      {
+        $project: {
+          _id: 1,
+          loginCount: 1,
+          lastLogin: 1,
+          name: '$userInfo.name',
+          email: '$userInfo.email',
+          role: '$userInfo.role'
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalLogins,
+        activeSessions,
+        loginsToday,
+        loginsThisWeek,
+        uniqueUsersToday: uniqueUsersToday.length,
+        avgSessionDuration,
+        loginsByHour,
+        mostActiveUsers
       }
     });
   } catch (error) {

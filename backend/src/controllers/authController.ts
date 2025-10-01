@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import crypto from 'crypto';
 import { User } from '../models/User';
+import LoginSession from '../models/LoginSession';
 import { ApiResponse, LoginCredentials, RegisterCredentials } from '../types';
 import { emailService } from '../services/emailService';
 
@@ -103,6 +104,20 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     // Get token
     const token = user.getSignedJwtToken();
 
+    // Create login session record
+    try {
+      await LoginSession.create({
+        user: user._id,
+        loginTime: new Date(),
+        ipAddress: req.ip || req.connection.remoteAddress,
+        userAgent: req.get('user-agent'),
+        isActive: true,
+      });
+    } catch (sessionError) {
+      // Log error but don't fail the login
+      console.error('Failed to create login session:', sessionError);
+    }
+
     res.status(200).json({
       success: true,
       data: {
@@ -115,6 +130,40 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
           role: user.role
         }
       }
+    } as ApiResponse);
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Logout user
+// @route   POST /api/auth/logout
+// @access  Private
+export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const userId = req.user?._id;
+
+    if (userId) {
+      // Find the most recent active session for this user and mark it as logged out
+      const activeSession = await LoginSession.findOne({
+        user: userId,
+        isActive: true
+      }).sort({ loginTime: -1 });
+
+      if (activeSession) {
+        activeSession.logoutTime = new Date();
+        activeSession.isActive = false;
+        activeSession.sessionDuration = Math.floor(
+          (activeSession.logoutTime.getTime() - activeSession.loginTime.getTime()) / 1000
+        );
+        await activeSession.save();
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
     } as ApiResponse);
 
   } catch (error) {
