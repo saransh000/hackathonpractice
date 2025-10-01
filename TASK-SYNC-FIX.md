@@ -79,6 +79,22 @@ const handleDragOver = async (event: DragOverEvent) => {
 };
 ```
 
+### 3. Fixed Remote Update Handling (`ConnectedKanbanBoard.tsx`)
+**Before (Broken):**
+```typescript
+const handleRemoteColumnsUpdate = (data: any) => {
+  setBoard(prev => ({ ...prev, columns: data.columns }));  // ❌ Stale data
+};
+```
+
+**After (Fixed):**
+```typescript
+const handleRemoteColumnsUpdate = (data: any) => {
+  console.log('📋 Remote columns update received:', data);
+  loadTasks();  // ✅ Fetches fresh data from database
+};
+```
+
 ## How It Works Now
 
 ### Flow When User 1 Creates a Task:

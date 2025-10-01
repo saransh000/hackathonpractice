@@ -22,6 +22,7 @@ export const ConnectedKanbanBoard: React.FC = () => {
   const [activeUsers, setActiveUsers] = useState<string[]>([]);
   const [showTeamSelector, setShowTeamSelector] = useState(false);
   const [boardId, setBoardId] = useState<string | null>(null);
+  const [isBoardLoading, setIsBoardLoading] = useState(true);
   
   const [board, setBoard] = useState<Board>({
     id: 'main',
@@ -30,11 +31,13 @@ export const ConnectedKanbanBoard: React.FC = () => {
     teamMembers: [],
   });
 
-  // Load teams and initialize board on mount
+  // Load teams and initialize board on mount (only when user is available)
   useEffect(() => {
-    loadTeams();
-    initializeBoard();
-  }, []);
+    if (user) {
+      loadTeams();
+      initializeBoard();
+    }
+  }, [user]);
 
   // Initialize Socket.IO when component mounts
   useEffect(() => {
@@ -86,6 +89,9 @@ export const ConnectedKanbanBoard: React.FC = () => {
   // Initialize or get user's default board
   const initializeBoard = async () => {
     try {
+      setIsBoardLoading(true);
+      console.log('🔄 Initializing board...');
+      
       // Try to get existing boards
       const boards = await getBoards();
       
@@ -97,6 +103,7 @@ export const ConnectedKanbanBoard: React.FC = () => {
         console.log('✅ Loaded existing board:', userBoard._id);
       } else {
         // Create a default board
+        console.log('📋 No boards found, creating default board...');
         const newBoard = await createBoard({
           title: 'My Hackathon Board',
           description: 'Default board for task management',
@@ -108,6 +115,9 @@ export const ConnectedKanbanBoard: React.FC = () => {
       }
     } catch (err) {
       console.error('❌ Failed to initialize board:', err);
+      alert('Failed to initialize board. Please refresh the page and try again.');
+    } finally {
+      setIsBoardLoading(false);
     }
   };
 
@@ -304,7 +314,17 @@ export const ConnectedKanbanBoard: React.FC = () => {
       </div>
 
       {/* Kanban Board */}
-      {selectedTeam ? (
+      {isBoardLoading ? (
+        <div className="text-center py-16 px-8">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent mb-4"></div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            Initializing Board...
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Setting up your workspace, please wait...
+          </p>
+        </div>
+      ) : selectedTeam ? (
         <KanbanBoard board={board} onUpdateBoard={handleUpdate} boardId={boardId} />
       ) : (
         <div className="text-center py-16 px-8">
