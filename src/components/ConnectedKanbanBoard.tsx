@@ -164,7 +164,8 @@ export const ConnectedKanbanBoard: React.FC = () => {
 
   const handleRemoteColumnsUpdate = (data: any) => {
     console.log('📋 Remote columns update received:', data);
-    setBoard(prev => ({ ...prev, columns: data.columns }));
+    // Reload tasks from database to get the latest data
+    loadTasks();
   };
 
   const handleUserJoined = (data: any) => {
