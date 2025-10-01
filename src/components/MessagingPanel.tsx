@@ -3,7 +3,7 @@ import axios from 'axios';
 
 interface User {
   _id: string;
-  username: string;
+  name: string;
   email: string;
   role: string;
 }
@@ -12,12 +12,12 @@ interface Message {
   _id: string;
   sender: {
     _id: string;
-    username: string;
+    name: string;
     email: string;
   };
   recipient: {
     _id: string;
-    username: string;
+    name: string;
     email: string;
   };
   content: string;
@@ -27,7 +27,7 @@ interface Message {
 
 interface Conversation {
   userId: string;
-  username: string;
+  username: string; // Keep as 'username' since backend returns it as 'username'
   email: string;
   lastMessage: string;
   lastMessageDate: string;
@@ -151,7 +151,7 @@ export const MessagingPanel: React.FC = () => {
     const conv = conversations.find(c => c.userId === selectedUser);
     if (conv) return conv;
     const user = availableUsers.find(u => u._id === selectedUser);
-    return user ? { username: user.username, email: user.email } : null;
+    return user ? { username: user.name, email: user.email } : null;
   };
 
   return (
@@ -225,10 +225,10 @@ export const MessagingPanel: React.FC = () => {
                       >
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                            {user.username.charAt(0).toUpperCase()}
+                            {user.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1">
-                            <p className="font-inter font-semibold text-gray-800 dark:text-gray-200">{user.username}</p>
+                            <p className="font-inter font-semibold text-gray-800 dark:text-gray-200">{user.name}</p>
                             <p className="text-xs text-gray-500">{user.email}</p>
                           </div>
                         </div>

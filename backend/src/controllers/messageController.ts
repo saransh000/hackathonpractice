@@ -53,8 +53,8 @@ export const sendMessage = async (req: Request, res: Response): Promise<void> =>
     });
 
     // Populate sender and recipient details
-    await message.populate('sender', 'username email');
-    await message.populate('recipient', 'username email');
+    await message.populate('sender', 'name email');
+    await message.populate('recipient', 'name email');
 
     res.status(201).json({
       success: true,
@@ -91,8 +91,8 @@ export const getConversation = async (req: Request, res: Response): Promise<void
         { sender: userId, recipient: currentUserId }
       ]
     })
-      .populate('sender', 'username email')
-      .populate('recipient', 'username email')
+      .populate('sender', 'name email')
+      .populate('recipient', 'name email')
       .sort({ createdAt: 1 });
 
     // Mark received messages as read
@@ -182,7 +182,7 @@ export const getAllConversations = async (req: Request, res: Response): Promise<
       {
         $project: {
           userId: '$_id',
-          username: '$user.username',
+          username: '$user.name',
           email: '$user.email',
           lastMessage: 1,
           lastMessageDate: 1,
@@ -329,8 +329,8 @@ export const getAvailableUsers = async (req: Request, res: Response): Promise<vo
     // Get all users except current user
     const users = await User.find(
       { _id: { $ne: currentUserId } },
-      'username email role createdAt'
-    ).sort({ username: 1 });
+      'name email role createdAt'
+    ).sort({ name: 1 });
 
     res.status(200).json({
       success: true,
