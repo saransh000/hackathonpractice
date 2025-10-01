@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
+// Get API URL from environment or construct dynamically
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return `${import.meta.env.VITE_API_URL}/api`;
+  }
+  return `${window.location.protocol}//${window.location.hostname}:5000/api`;
+};
+
+const API_URL = getApiUrl();
+
 interface User {
   _id: string;
   name: string;
@@ -33,8 +43,6 @@ interface Conversation {
   lastMessageDate: string;
   unreadCount: number;
 }
-
-const API_URL = `${window.location.protocol}//${window.location.hostname}:5000/api`;
 
 export const MessagingPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

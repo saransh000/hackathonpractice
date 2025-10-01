@@ -37,6 +37,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Get the API base URL dynamically
   const getApiBaseUrl = () => {
+    // Use environment variable if available, otherwise construct from window location
+    if (import.meta.env.VITE_API_URL) {
+      return import.meta.env.VITE_API_URL;
+    }
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     const port = '5000'; // Backend port
