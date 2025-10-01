@@ -1,4 +1,4 @@
- import React, { createContext, useContext, useState } from 'react';
+ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { User, LoginCredentials, AuthContextType, SignupData } from '../types/auth';
 
@@ -13,12 +13,26 @@ const DEMO_USERS: User[] = [
 ];
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Always start with no user - require login every time
-  const [user, setUser] = useState<User | null>(null);
+  // Initialize user from localStorage so reload keeps the session
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const saved = window.localStorage.getItem('user');
+      return saved ? (JSON.parse(saved) as User) : null;
+    } catch (e) {
+      return null;
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('registeredUsers');
-    return saved ? JSON.parse(saved) : [...DEMO_USERS];
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = window.localStorage.getItem('registeredUsers');
+        return saved ? JSON.parse(saved) : [...DEMO_USERS];
+      }
+    } catch (e) {
+      // ignore
+    }
+    return [...DEMO_USERS];
   });
 
   // Get the API base URL dynamically
@@ -60,8 +74,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       setUser(loggedInUser);
-      localStorage.setItem('user', JSON.stringify(loggedInUser));
-      localStorage.setItem('token', result.data.token); // Store JWT token
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('user', JSON.stringify(loggedInUser));
+        window.localStorage.setItem('token', result.data.token); // Store JWT token
+      }
       setIsLoading(false);
     } catch (error: any) {
       setIsLoading(false);
@@ -103,7 +119,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Update registered users list
       const updatedUsers = [...registeredUsers, newUser];
       setRegisteredUsers(updatedUsers);
-      localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+      }
       
       setIsLoading(false);
     } catch (error: any) {
@@ -111,6 +129,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw new Error(error.message || 'Registration failed');
     }
   };
+
+  // Keep localStorage in sync with user state (handles manual logout/login elsewhere)
+  useEffect(() => {
+    try {
+      if (user) {
+        window.localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        window.localStorage.removeItem('user');
+        window.localStorage.removeItem('token');
+      }
+    } catch (e) {
+      // ignore localStorage errors
+    }
+  }, [user]);
 
   const logout = async () => {
     try {

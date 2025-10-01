@@ -24,7 +24,7 @@
    - Region: **Closest to you** (e.g., Mumbai/Singapore)
    - Cluster Tier: **M0 Sandbox (FREE)**
    - Cluster Name: `hackathon-cluster`
-   - Click "Create"
+     - Click "Create"
 5. Wait 3-5 minutes for cluster to be created
 
 ### Security Setup:
