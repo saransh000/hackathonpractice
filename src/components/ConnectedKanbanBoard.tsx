@@ -5,6 +5,7 @@ import type { Board, Column, Task } from '../types';
 import type { Team } from '../types/team';
 import { getTasks } from '../api/tasks';
 import { teamAPI } from '../api/teams';
+import { getBoards, createBoard } from '../api/boards';
 import { socketService } from '../services/socket';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,6 +21,7 @@ export const ConnectedKanbanBoard: React.FC = () => {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [activeUsers, setActiveUsers] = useState<string[]>([]);
   const [showTeamSelector, setShowTeamSelector] = useState(false);
+  const [boardId, setBoardId] = useState<string | null>(null);
   
   const [board, setBoard] = useState<Board>({
     id: 'main',
@@ -28,9 +30,10 @@ export const ConnectedKanbanBoard: React.FC = () => {
     teamMembers: [],
   });
 
-  // Load teams on mount
+  // Load teams and initialize board on mount
   useEffect(() => {
     loadTeams();
+    initializeBoard();
   }, []);
 
   // Initialize Socket.IO when component mounts
@@ -77,6 +80,34 @@ export const ConnectedKanbanBoard: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to load teams:', err);
+    }
+  };
+
+  // Initialize or get user's default board
+  const initializeBoard = async () => {
+    try {
+      // Try to get existing boards
+      const boards = await getBoards();
+      
+      if (boards.length > 0) {
+        // Use the first board
+        const userBoard = boards[0];
+        setBoardId(userBoard._id);
+        setBoard(prev => ({ ...prev, id: userBoard._id }));
+        console.log('✅ Loaded existing board:', userBoard._id);
+      } else {
+        // Create a default board
+        const newBoard = await createBoard({
+          title: 'My Hackathon Board',
+          description: 'Default board for task management',
+          isPublic: false
+        });
+        setBoardId(newBoard._id);
+        setBoard(prev => ({ ...prev, id: newBoard._id }));
+        console.log('✅ Created new board:', newBoard._id);
+      }
+    } catch (err) {
+      console.error('❌ Failed to initialize board:', err);
     }
   };
 
@@ -273,7 +304,7 @@ export const ConnectedKanbanBoard: React.FC = () => {
 
       {/* Kanban Board */}
       {selectedTeam ? (
-        <KanbanBoard board={board} onUpdateBoard={handleUpdate} />
+        <KanbanBoard board={board} onUpdateBoard={handleUpdate} boardId={boardId} />
       ) : (
         <div className="text-center py-16 px-8">
           <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />

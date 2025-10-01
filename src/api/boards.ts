@@ -51,9 +51,9 @@ export type UpdateBoardDTO = {
 type ApiList<T> = { success: boolean; count?: number; data: T[]; pagination?: any };
 type ApiOne<T> = { success: boolean; data: T };
 
-// Get user token from localStorage
+// Get user token from localStorage (AuthContext stores token under 'token')
 const getAuthToken = () => {
-  return localStorage.getItem('authToken');
+  return localStorage.getItem('token');
 };
 
 // Add auth header to requests

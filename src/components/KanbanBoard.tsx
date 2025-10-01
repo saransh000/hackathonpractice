@@ -21,9 +21,10 @@ import { EnhancedHeader } from './EnhancedHeader';
 interface KanbanBoardProps {
   board: Board;
   onUpdateBoard: (board: Board) => void;
+  boardId: string | null;
 }
 
-export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }) => {
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard, boardId }) => {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState<string>('');
@@ -42,7 +43,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }
     setActiveTask(task);
   };
 
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragOver = async (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
 
@@ -60,6 +61,23 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }
     if (activeColumn.id !== overColumn.id) {
       const updatedBoard = moveTaskBetweenColumns(activeTask, activeColumn, overColumn);
       onUpdateBoard(updatedBoard);
+
+      // Update task status in database
+      try {
+        await fetch(`http://localhost:5000/api/tasks/${activeTask.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${window.localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            status: overColumn.id
+          })
+        });
+        console.log('✅ Task status updated in database:', activeTask.id, '→', overColumn.id);
+      } catch (error) {
+        console.error('❌ Failed to update task status:', error);
+      }
     }
   };
 
@@ -148,21 +166,63 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ board, onUpdateBoard }
     setIsAddModalOpen(true);
   };
 
-  const handleTaskSubmit = (taskData: CreateTaskData) => {
-    const newTask: Task = {
-      id: `task-${Date.now()}`,
-      ...taskData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+  const handleTaskSubmit = async (taskData: CreateTaskData) => {
+    try {
+      // Check if boardId is available
+      if (!boardId) {
+        alert('Board is not initialized. Please refresh the page.');
+        console.error('❌ No boardId available');
+        return;
+      }
 
-    const updatedColumns = board.columns.map(column =>
-      column.id === selectedColumnId
-        ? { ...column, tasks: [...column.tasks, newTask] }
-        : column
-    );
+      // Create task in database first
+      const response = await fetch('http://localhost:5000/api/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${window.localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          title: taskData.title,
+          description: taskData.description,
+          priority: taskData.priority,
+          status: selectedColumnId,
+          assignedTo: taskData.assignee,
+          boardId: boardId,  // ✅ Include boardId
+          column: selectedColumnId  // ✅ Include column
+        })
+      });
 
-    onUpdateBoard({ ...board, columns: updatedColumns });
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
+
+      const result = await response.json();
+      const savedTask = result.data.task;
+
+      // Create task object with database ID
+      const newTask: Task = {
+        id: savedTask._id,
+        title: savedTask.title,
+        description: savedTask.description || '',
+        assignee: savedTask.assignedTo,
+        priority: savedTask.priority,
+        createdAt: new Date(savedTask.createdAt),
+        updatedAt: new Date(savedTask.updatedAt),
+      };
+
+      const updatedColumns = board.columns.map(column =>
+        column.id === selectedColumnId
+          ? { ...column, tasks: [...column.tasks, newTask] }
+          : column
+      );
+
+      onUpdateBoard({ ...board, columns: updatedColumns });
+      console.log('✅ Task created and synced:', newTask);
+    } catch (error) {
+      console.error('❌ Failed to create task:', error);
+      alert('Failed to create task. Please try again.');
+    }
   };
 
   const selectedColumn = board.columns.find(col => col.id === selectedColumnId);
